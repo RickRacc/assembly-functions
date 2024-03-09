@@ -20,8 +20,55 @@ ntz:
     // (STUDENT TODO) Code for ntz goes here.
     // Input parameter n is passed in X0
     // Output value is returned in X0.
+    LSL X1, X0, #1
+    ORR X0, X0, X1
+    LSL X1, X0, #2
+    ORR X0, X0, X1
+    LSL X1, X0, #4
+    ORR X0, X0, X1
+    LSL X1, X0, #8
+    ORR X0, X0, X1
+    LSL X1, X0, #16
+    ORR X0, X0, X1
+    LSL X1, X0, #32
+    ORR X0, X0, X1
+
+    MVN X0, X0
+
+    LSR X1, X0, #1
+    ANDS X1, X1, 0x5555555555555555
+    ANDS X0, X0, 0x5555555555555555
+    ADD X0, X0, X1
+
+    LSR X1, X0, #2
+    ANDS X1, X1, 0x3333333333333333
+    ANDS X0, X0, 0x3333333333333333
+    ADD X0, X0, X1
+
+    LSR X1, X0, #4
+    ANDS X1, X1, 0x0F0F0F0F0F0F0F0F
+    ANDS X0, X0, 0x0F0F0F0F0F0F0F0F
+    ADD X0, X0, X1
+
+    LSR X1, X0, #8
+    ANDS X1, X1, 0x00FF00FF00FF00FF
+    ANDS X0, X0, 0x00FF00FF00FF00FF
+    ADD X0, X0, X1
+
+    LSR X1, X0, #16
+    ANDS X1, X1, 0x0000FFFF0000FFFF
+    ANDS X0, X0, 0x0000FFFF0000FFFF
+    ADD X0, X0, X1
+
+    LSR X1, X0, #32
+    ANDS X1, X1, 0x00000000FFFFFFFF
+    ANDS X0, X0, 0x00000000FFFFFFFF
+    ADD X0, X0, X1
+
+    ANDS X0, X0, 0x000000000000007F
+
+
     ret
-    MOV X0, #5
     .size   ntz, .-ntz
     // ... and ends with the .size above this line.
 
