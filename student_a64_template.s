@@ -21,7 +21,7 @@ ntz:
     // Input parameter n is passed in X0
     // Output value is returned in X0.
     ret
-
+    MOV X0, #5
     .size   ntz, .-ntz
     // ... and ends with the .size above this line.
 
