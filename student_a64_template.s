@@ -83,6 +83,48 @@ ntz:
 aiken_to_long:
     // Input parameter buf is passed in X0
     // Output value is returned in X0.
+
+    // go through each 4 bits of a 64 bit long
+    // rewrite those 4 bits as their decimal representation:
+    //              0x0 = 0, 0x1 = 1, 0x2 = 2, 0x3 = 3, 0x4 = 4
+    //              if between 0x5 and 0xA, return -1
+    //              otherwise the number will be between '0xB' through '0xF'
+                                //                  , return those as '' - 0x6 
+
+    MOV X8, X0  
+    MOV X0, #0
+    MOV X1, #60
+    MOV X2, #15
+
+
+.LBB14_2:
+    LSR X7, X8, X1
+    ANDS X7, X7, 0x000000000000000F
+    CMP X7, 0xF
+    B.LE .LBB16_2
+    SUB X7, X7, 0x6
+
+
+.LBB16_2:
+    CMP x7, 0x5
+    B.GE .LBB18_2
+
+.LBB18_2:
+    MOV X3, #-1
+    RET 
+
+
+
+
+
+
+
+
+   // SUBS X2, #1
+    //B.MI, .LBB18_2                     
+
+
+
     ret
 
     .size   aiken_to_long, .-aiken_to_long
