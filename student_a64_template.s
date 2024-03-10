@@ -86,48 +86,65 @@ aiken_to_long:
     // Input parameter buf is passed in X0
     // Output value is returned in X0.
 
+
     // go through each 4 bits of a 64 bit long
     // rewrite those 4 bits as their decimal representation:
     //              0x0 = 0, 0x1 = 1, 0x2 = 2, 0x3 = 3, 0x4 = 4
     //              if between 0x5 and 0xA, return -1
     //              otherwise the number will be between '0xB' through '0xF'
-                                //                  , return those as '' - 0x6 
+                                //                  , return those as '' - 0x6
 
-    MOV X8, X0  
-    MOV X0, #0
-    MOV X1, #60
+
+    //MOVZ X8, X0
+    ANDS X8, X0, 0xFFFFFFFFFFFFFFF
+    //LDUR X8, [sp]
+    MOVZ X0, #0
+    MOVZ X1, #60
+
 
 for_loop:
     CMP X1, XZR
     B.LT ended
 
+
     LSR X7, X8, X1
     ANDS X7, X7, #0xF
 
+
     SUB X1, X1, #4
+
 
     CMP X7, #0xB
     B.LT IF_LT_0xB
 
+
     SUB X7, X7, #0x6
     B loop_to_add_decimal_to_X0
+
 
 IF_LT_0xB:
     CMP x7, #0x5
     B.LT loop_to_add_decimal_to_X0
 
-    MOV X0, #1
+
+    MOVZ X0, #1
     SUB X0, X0, #2
     B ended
+
 
 loop_to_add_decimal_to_X0:
     //for loop to mult
     ADD X0, X0, X7
 
+
     CMP X1, XZR
     B.LT ended
 
-    MOV X7, X0
+
+    //MOVZ X7, X0
+    ANDS X7, X0, #0xFFFFFFFFFFFFFFF
+    //LDUR X7, [sp]
+
 
     ADD X0, X0, X7
     ADD X0, X0, X7
@@ -136,16 +153,19 @@ loop_to_add_decimal_to_X0:
     LSL X0, X0, #1
     B for_loop
 
+
 ended:
     RET
 
 
-
-
     ret
+
 
     .size   aiken_to_long, .-aiken_to_long
     // ... and ends with the .size above this line.
+
+
+
 
 
 
@@ -155,10 +175,97 @@ ended:
     .global unicode_to_UTF8
     .type   unicode_to_UTF8, %function
 
+
 unicode_to_UTF8:
     // (STUDENT TODO) Code for unicode_to_UTF8 goes here.
     // Input parameter a is passed in X0; input parameter utf8 is passed in X1.
     // There are no output values.
+
+
+    //LDUR X2, [X1]
+    //MOVZ X3, 0xFF
+   
+    MOVZ X3, 0x7F
+    CMP X0, X3
+    B.LE one_byte
+
+    MOVZ X3, 0x07FF
+    CMP X0, X3
+    B.LE two_bytes
+
+    MOVZ X3, 0xFFFF
+    CMP X0, X3
+    B.LE three_bytes
+
+    MOVZ X3, 0x10FF
+    MOVK X3, 0xFFF, LSL 16
+    CMP X0, X3
+    B.LE four_bytes
+
+    MOVZ X3, 0xFF
+    STUR X3, [X1]
+    STUR X3, [X1, #1]
+    STUR X3, [X1, #2]
+    STUR X3, [X1, #3]
+
+
+one_byte:
+    STUR X0, [X1]
+    RET
+
+two_bytes:
+    LSR X3, X0, #6
+    ANDS X3, X3, #0x1F
+    ORR X3, X3, 0xC0
+    STUR X3, [X1]
+   
+    ANDS X3, X0, #0x3F
+    ORR X3, X3, #0x80
+    STUR X3, [X1, #1]
+    RET
+
+three_bytes:
+    LSR X3, X0, #12
+    ANDS X3, X3, #0x0F
+    ORR X3, X3, 0xE0
+    STUR X3, [X1]
+
+    LSR X3, X0, #6
+    ANDS X3, X3, #0x3F
+    ORR X3, X3, 0x80
+    STUR X3, [X1, #1]
+
+    //LSR X3, X0, #18
+    ANDS X3, X0, #0x3F
+    ORR X3, X3, 0x80
+    STUR X3, [X1, #2]
+
+    RET
+
+
+four_bytes:
+    LSR X3, X0, #18
+    ANDS X3, X3, #0x07
+    ORR X3, X3, 0xF0
+    STUR X3, [X1]
+
+    LSR X3, X0, #12
+    ANDS X3, X3, #0x3F
+    ORR X3, X3, 0x80
+    STUR X3, [X1, #1]
+
+    LSR X3, X0, #6
+    ANDS X3, X3, #0x3F
+    ORR X3, X3, 0x80
+    STUR X3, [X1, #2]
+
+    //LSR X3, X0, #18
+    ANDS X3, X0, #0x3F
+    ORR X3, X3, 0x80
+    STUR X3, [X1, #3]
+
+    
+    RET
 
     ret
     .size   unicode_to_UTF8, .-unicode_to_UTF8
