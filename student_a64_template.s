@@ -67,6 +67,8 @@ ntz:
 
     ANDS X0, X0, 0x000000000000007F
 
+    //MOV X0, 0x42
+    //ADD X0, X0, XZR 
 
     ret
     .size   ntz, .-ntz
@@ -94,34 +96,49 @@ aiken_to_long:
     MOV X8, X0  
     MOV X0, #0
     MOV X1, #60
-    MOV X2, #15
 
+for_loop:
+    CMP X1, XZR
+    B.LT ended
 
-.LBB14_2:
     LSR X7, X8, X1
-    ANDS X7, X7, 0x000000000000000F
-    CMP X7, 0xF
-    B.LE .LBB16_2
-    SUB X7, X7, 0x6
+    ANDS X7, X7, #0xF
 
+    SUB X1, X1, #4
 
-.LBB16_2:
-    CMP x7, 0x5
-    B.GE .LBB18_2
+    CMP X7, #0xB
+    B.LT IF_LT_0xB
 
-.LBB18_2:
-    MOV X3, #-1
-    RET 
+    SUB X7, X7, #0x6
+    B loop_to_add_decimal_to_X0
 
+IF_LT_0xB:
+    CMP x7, #0x5
+    B.LT loop_to_add_decimal_to_X0
 
+    MOV X0, #1
+    SUB X0, X0, #2
+    B ended
 
+loop_to_add_decimal_to_X0:
+    //for loop to mult
+    ADD X0, X0, X7
 
+    CMP X1, XZR
+    B.LT ended
 
+    MOV X7, X0
 
+    ADD X0, X0, X7
+    ADD X0, X0, X7
+    ADD X0, X0, X7
+    ADD X0, X0, X7
+    LSL X0, X0, #1
+    B for_loop
 
+ended:
+    RET
 
-   // SUBS X2, #1
-    //B.MI, .LBB18_2                     
 
 
 
