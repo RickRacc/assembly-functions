@@ -314,7 +314,23 @@ second_byte_not_zero:
     CMP X3, XZR
     //check if third byte is zero, just do encoding for 2 bytes
     B.NE third_byte_not_zero
-    MOVZ X0, #1
+
+    //last
+    ANDS X2, X1, 0xF
+
+    //second last
+    ANDS X3, X1, 0b110000
+    ANDS X4, X1, 0b1100000000
+    LSR X4, X4, 2
+    ADD X3, X3, X4
+
+    //last
+    ANDS X4, X1, 0b1110000000000
+    LSR X4, X4, 2
+
+    ADD X2, X2, X3
+    ADD X2, X2, X4
+
     RET
 
 third_byte_not_zero:
@@ -332,6 +348,7 @@ third_byte_not_zero:
 
     //last
     ANDS X2, X1, 0xF
+    ANDS X0, X2, 0xFFF
 
     //second last
     ANDS X3, X1, 0b110000
