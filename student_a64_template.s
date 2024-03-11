@@ -283,6 +283,158 @@ UTF8_to_unicode:
     // (STUDENT TODO) Code for UTF8_to_unicode goes here.
     // Input parameter utf8 is passed in X0.
     // Output value is returned in X0.
+    LDUR X1, [X0]
+    //check if 1st element in array 0, if it is then return 0
+    ANDS X1, X1, #0xFF
+    CMP X1, XZR
+    B.NE first_byte_not_zero
+    MOVZ X0, #0
+    RET
+
+first_byte_not_zero:
+    // first byte is not zero
+    LDUR X2, [X0, #1]
+    ANDS X2, X2, #0xFF
+    CMP X2, XZR
+    // check if second byte is zero, just do encoding for 1 byte
+    B.NE second_byte_not_zero
+    ANDS X0, X1, #0x7F
+    RET
+    
+
+second_byte_not_zero:
+   LSL X1, X1, 8
+   EOR x1, X1, 0x00FF
+
+   EOR X2, X2, 0xFF00
+   ANDS X1, X1, X2
+
+    LDUR X3, [X0, #2]
+    ANDS X3, X3, #0xFF
+    CMP X3, XZR
+    //check if third byte is zero, just do encoding for 2 bytes
+    B.NE third_byte_not_zero
+    MOVZ X0, #1
+    RET
+
+third_byte_not_zero:
+    LSL X1, X1, 8
+    EOR x1, X1, 0x0000FF
+
+    EOR X3, X3, 0xFFFF00
+    ANDS X1, X1, X3
+
+
+    LDUR X4, [X0, #3]
+    ANDS X4, X4, #0xFF
+    CMP X4, XZR
+    B.NE fourth_byte_not_zero
+
+    //last
+    ANDS X2, X1, 0xF
+
+    //second last
+    ANDS X3, X1, 0b110000
+    ANDS X4, X1, 0b1100000000
+    LSR X4, X4, 2
+    ADD X3, X3, X4
+
+    // third last 
+    ANDS X4, X1, 0b11110000000000
+    LSR X4, X4, 2
+
+    // 4th last
+    ANDS X5, X1, 0xF0000
+    LSR X5, X5, 4
+
+    ADD X2, X2, X3
+    ADD X2, X2, X4
+    ADD X2, X2, X5
+ 
+    ANDS X0, X2, 0xFFFF
+    RET
+
+fourth_byte_not_zero: 
+    LSL X1, X1, 8
+    EOR x1, X1, 0x000000FF
+
+    EOR X4, X4, 0xFFFFFF00
+    ANDS X1, X1, X4
+
+    
+    //last 
+    ANDS X2, X1, 0xF
+
+    //MOVZ X9, 0xFFF
+    //LSL X9, X9, 12
+    //MOVK X9, 0xFF0
+    
+    //EOR X2, X2, X9
+
+    //second last 
+    ANDS X3, X1, 0xF0 
+    LSR X3, X3, 4
+    ANDS X3, X3, 0b0011
+
+    ANDS X4, X1, 0xF00
+    LSR X4, X4, 6
+    ANDS X4, X4, 0b1100
+    
+    ADD X3, X3, X4
+    LSL X3, X3, 4
+
+    //MOVZ X9, 0xFFF
+    //LSL X9, X9, 12
+    //MOVK X9, 0xF0F
+    //EOR X2, X2, X9
+
+
+    // third last
+    ANDS X4, X1, 0b11110000000000
+    LSR X4, X4, 2
+
+   // MOVZ X9, 0xFFF
+   // LSL X9, X9, 12
+   // MOVK X9, 0x0FF
+   // EOR X4, X4, X9
+
+    //4th last
+    ANDS X5, X1, 0xF0000
+                 
+    LSR X5, X5, 4
+
+   // MOVZ X9, 0xFF0
+   // LSL X9, X9, 12
+   // MOVK X9, 0xFFF
+   // EOR X5, X5, X9
+
+    //5th last
+    ANDS X6, X1, 0b1100000000000000000000
+    LSR X6, X6, 20
+
+    ANDS X7, X1, 0b11000000000000000000000000
+    LSR X7, X7, 22
+    
+    ADD X6, X6, X7
+    //0xF0FFFF
+    LSL X6, X6, 16
+
+    // 6th last
+    ANDS X7, X1, 0b100000000000000000000000000
+    //0x0FFFFF
+    LSR X7, X7, 6
+    
+
+    ADD X2, X2, X3
+    ADD X2, X2, X4
+    ADD X2, X2, X5
+    ADD X2, X2, X6
+    ADD X2, X2, X7
+
+
+    ANDS X0, X2, 0xFFFFFF
+    RET
+    
 
     ret
     .size   UTF8_to_unicode, .-UTF8_to_unicode
