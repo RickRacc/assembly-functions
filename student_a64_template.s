@@ -469,11 +469,77 @@ fourth_byte_not_zero:
     .global ustrncmp
     .type   ustrncmp, %function
 
+
+
+// make a for loop that goes through n times
+// check if current iteration of loop and num are same
+        // if so return 2
+// check if the characters at the cur position are the same
+        // if they are move onto the next 
+// if they arent the same
+        // check if either of them are the null terminator
+            // if so return 100
+        // if both are non null ASCII vals,
+            // return 1 if ASCCI val at cur pos in str1 is greater
+            // and -1 if ASCII val at cur pos in str2 is greater
 ustrncmp:
     // (STUDENT TODO) Code for ustrncmp goes here.
     // Input parameter str1 is passed in X0; input parameter str2 is passed in X1;
     //  input parameter num is passed in X2
     // Output value is returned in X0.
+
+    MOVZ X3, #0
+    
+
+// 1 and 3 supposed to equal 2
+// 2 supposed to be -1
+// 4 supposed to be 100
+// 5 supposed to be 1
+for_loop2:
+    //ANDS X0, X2, #0xFF
+    //ret
+    CMP X3, X2
+    B.EQ the_end
+
+    LDUR X4, [X0]
+    LDUR X5, [X1]
+    ANDS X4, X4, #0x7F
+    ANDS X5, X5, #0x7F
+    CMP X4, X5
+    //ret
+    B.NE different_vals
+    
+    ADD X3, X3, #1
+    ADD X0, X0, #1
+    ADD X1, X1, #1
+    B for_loop2
+
+different_vals:
+    CMP X4, #0
+    B.EQ null_terminator
+    CMP X5, #0
+    B.EQ null_terminator
+
+    CMP X4, X5
+    B.LT less_than
+    MOVZ X0, #1
+    RET
+
+less_than:
+    MOVZ X0, #1
+    SUB X0, X0, #2
+    RET
+    
+null_terminator:
+    MOVZ X0, #100
+    RET
+
+the_end:
+    MOVZ X0, #2
+    RET
+
+
+
     ret
 
     .size   ustrncmp, .-ustrncmp
