@@ -553,11 +553,52 @@ the_end:
     .global gcd_rec
     .type   gcd_rec, %function
 
+
+
 gcd_rec:
     // (STUDENT TODO) Code for gcd_rec goes here.
     // Input parameter a is passed in X0; input parameter b is passed in X1.
     // Output value is returned in X0.
+
+    //if a = 0, or b = 0, return -1
+    
+    //CMP X0, #10
+   // B.GT finished
+
+    CMP X0, XZR
+    B.EQ val_zero
+    CMP X1, XZR
+    B.EQ val_zero
+
+    MOVZ X3, #0
+    B recursion
+
+recursion:
+    SUBS X0, X0, X1
+    ADDS X3, X3, #1
+
+    CMP X0, XZR
+    B.LT base_case1
+    B.EQ finished
+    B recursion
+
+
+base_case1:
+    ANDS X0, X1, #0xFFFFFFF
+    ANDS X1, X3, #0xFFFFFFF
+    MOVZ X3, #0
+    B recursion
+
+finished:
+    ANDS X0, X1, #0xFFFFFFF
     ret
+
+val_zero:
+    MOVZ X0, #1
+    SUBS X0, X0, #2
+    ret
+
+    RET
 
     .size   gcd_rec, .-gcd_rec
     // ... and ends with the .size above this line.
