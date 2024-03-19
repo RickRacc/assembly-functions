@@ -503,8 +503,8 @@ for_loop2:
 
     LDUR X4, [X0]
     LDUR X5, [X1]
-    ANDS X4, X4, #0x7F
-    ANDS X5, X5, #0x7F
+    ANDS X4, X4, #0xFF
+    ANDS X5, X5, #0xFF
     CMP X4, X5
     //ret
     B.NE different_vals
@@ -570,24 +570,44 @@ gcd_rec:
     CMP X1, XZR
     B.EQ val_zero
 
-    MOVZ X3, #0
-    B recursion
-
+    MOVZ X2, #0
+    
 recursion:
-    SUBS X0, X0, X1
-    ADDS X3, X3, #1
+    SUB SP, SP, #16
+    STUR X29, [SP]
+    STUR X30, [SP, #8]   
+    ADD X29, SP, XZR  
+
+    
+    //ADDS X2, X2, #1
 
     CMP X0, XZR
-    B.LT base_case1
     B.EQ finished
-    B recursion
 
+    CMP X0, X1
+    B.GT base_case1
+
+    ANDS X2, X0, #0xFFFFFFF
+    ANDS X0, X1, #0xFFFFFFF
+    ANDS X1, X2, #0xFFFFFFF
+    MOVZ X2, #0
+    
+
+    // make into BL
+    //B recursion
 
 base_case1:
-    ANDS X0, X1, #0xFFFFFFF
-    ANDS X1, X3, #0xFFFFFFF
-    MOVZ X3, #0
-    B recursion
+    SUBS X0, X0, X1
+    
+    //make into BL and then return
+    BL recursion
+
+    LDUR X30, [X29, #8]
+    LDUR X29, [X29]
+    ADD SP, SP, #16
+
+    ret
+    
 
 finished:
     ANDS X0, X1, #0xFFFFFFF
