@@ -636,6 +636,45 @@ tree_traversal:
     // Input parameter root is passed in X0; input parameter bit_string is passed in X1;
     //  input parameter bit_string_length is passed in X2
     // Output value is returned in X0.
+    CMP X2, XZR
+    B.EQ returnNeg
+
+traverse:
+    CMP X0, #0
+    B.EQ returnNeg
+
+    CMP X2, XZR
+    B.EQ found
+
+    SUB X2, X2, #1
+
+    ANDS X3, X1, 0b01
+    LSR X1, X1, #1
+    CMP X3, #1
+    B.EQ rightChild
+
+    LDUR X0, [X0]
+    B traverse
+
+
+
+rightChild:
+    LDUR X0, [X0, #8]
+    B traverse
+
+    
+
+found:
+    LDUR X0, [X0, #16]
+   // MOVZ X0, 0
+    ret
+
+
+returnNeg:
+    MOVZ X0, #1
+    SUB X0, X0, #2
+    ret
+
     ret
 
     .size   tree_traversal, .-tree_traversal
