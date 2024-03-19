@@ -691,6 +691,32 @@ returnNeg:
 collatz_TST:
     // Input parameter n is passed in X0
     // Output value is returned in X0.
+    MOVZ X3, #0
+
+collatLoop:
+    CMP X0, #1
+    B.EQ exit
+
+    ADD X3, X3, #1
+
+    AND X1, X0, #1
+    CMP X1, XZR
+    B.EQ  even
+
+    ADD X2, X0, #0
+    ADD X0, X0, X2
+    ADD X0, X0, X2
+    ADD X0, X0, #1
+    B collatLoop
+
+even:
+    LSR X0, X0, #1
+    B collatLoop
+
+exit:
+    ADD X0, X3, #0
+    
+
     ret
 
     .size   collatz_TST, .-collatz_TST
