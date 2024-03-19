@@ -702,7 +702,7 @@ collatLoop:
     //ADD X3, X3, #1
     LSL X3, X3, 1
 
-    AND X1, X0, #1
+    ANDS X1, X0, #1
     CMP X1, XZR
     B.EQ  even
 
