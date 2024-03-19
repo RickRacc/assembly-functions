@@ -692,12 +692,15 @@ collatz_TST:
     // Input parameter n is passed in X0
     // Output value is returned in X0.
     MOVZ X3, #0
+    EOR X3, X3, 0x00FF00FF00FF00FF
+    EOR X3, X3, 0xFF00FF00FF00FF00
 
 collatLoop:
     CMP X0, #1
     B.EQ exit
 
-    ADD X3, X3, #1
+    //ADD X3, X3, #1
+    LSL X3, X3, 1
 
     AND X1, X0, #1
     CMP X1, XZR
@@ -715,9 +718,10 @@ even:
 
 exit:
     ADD X0, X3, #0
+    B ntz
     
 
-    ret
+    //ret
 
     .size   collatz_TST, .-collatz_TST
     // ... and ends with the .size above this line.
