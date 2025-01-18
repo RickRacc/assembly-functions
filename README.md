@@ -19,7 +19,7 @@ Compilation and Execution
   as -o project.o student_a64_template.s
 2) Link the Object File - Use the GNU Linker (ld) to create an executable:
   ld -o project project.o
-   Run the Executable - Execute the compiled binary:
+3) Run the Executable - Execute the compiled binary:
   ./project
    
 Testing:
